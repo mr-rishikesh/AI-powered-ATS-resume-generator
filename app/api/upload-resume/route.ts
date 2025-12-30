@@ -3,6 +3,7 @@ import { extractText } from "unpdf";
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
 import { generateATSScore } from "@/utils/calculateAts";
+import { generateResume } from '@/utils/main';
 
 export async function POST(req: Request) {
 
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
     const isImageOnly = text1.trim().length < 200;
     console.log(4);
 
-    const {parsed} = await generateATSScore(text1 , jobDescription )
+    const {parsed} = await generateResume(text1 , jobDescription )
 
     return NextResponse.json({
       aiResponse : parsed,
