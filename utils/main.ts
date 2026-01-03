@@ -16,9 +16,9 @@ export async function generateResume(resumeText: any, jobDescription: any) {
       };
     }
 
-    const latex = renderResumeToLatex(resume_template, parsed);
+    // const latex = renderResumeToLatex(resume_template, parsed);
 
-    return { parsed: latex };
+    return { parsed: parsed };
   } catch (error) {
     console.log(error);
     return {

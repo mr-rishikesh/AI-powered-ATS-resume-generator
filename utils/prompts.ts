@@ -70,6 +70,8 @@ STRICT NON-NEGOTIABLE RULES
 - Improve clarity and ATS alignment using ONLY existing words and phrases.
 - You may rephrase, but not invent.
 
+6. ALSO Prepare the profile summary ,  according to the job description that maximize the ats score and align to the job description
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 OUTPUT FORMAT (STRICT JSON)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
