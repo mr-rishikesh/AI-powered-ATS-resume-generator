@@ -36,7 +36,7 @@ export const atsOptimizationPrompt =
 
 You will receive:
 1. resume_text — raw resume content extracted from a PDF
-2. job_description — target job description (may be empty)
+2. job_description — target job description
 
 YOUR OBJECTIVE:
 Rewrite the resume to maximize ATS keyword matching while preserving
@@ -82,49 +82,62 @@ The JSON object must include ONLY the sections present in resume_text.
 Example structure (keys are conditional — include only if present):
 
 {
-  "NAME": "...",
-  "CONTACT": {
-    "Email": "...",
-    "Phone": "...",
-    "Location": "...",
-    "GitHub": "...",
-    "LinkedIn": "...",
-    "Other Links": "..."
+  "name": "",
+  "profile_summary": "",
+  "contact": {
+    "email": "",
+    "phone": "",
+    "location": "",
+    "github": "",
+    "linkedin": "",
+    "website": ""
   },
-  "SKILLS": {
-    "Languages": [],
-    "Frameworks & Libraries": [],
-    "Tools & Platforms": [],
-    "Core Subjects": [],
-    "Soft Skills": []
+  "skills": {
+    "languages": [],
+    "frameworks": [],
+    "tools": [],
+    "soft_skills": []
   },
-  "EDUCATION": [
+  "education": [
     {
-      "Institution": "...",
-      "Degree": "...",
-      "Location": "...",
-      "Duration": "...",
-      "Details": "..."
+      "institution": "",
+      "location": "",
+      "degree": "",
+      "start": "",
+      "end": "",
+      "details": []
     }
   ],
-  "EXPERIENCE": [
+  "experience": [
     {
-      "Role": "...",
-      "Organization": "...",
-      "Duration": "...",
-      "Bullets": []
+      "company": "",
+      "title": "",
+      "location": "",
+      "start": "",
+      "end": "",
+      "bullets": []
     }
   ],
-  "PROJECTS": [
+  "projects": [
     {
-      "Project Name": "...",
-      "Duration": "...",
-      "Tech Stack": [],
-      "Bullets": []
+      "name": "",
+      "role": "",
+      "start": "",
+      "end": "",
+      "url": "",
+      "bullets": []
     }
   ],
-  "ACHIEVEMENTS": []
+  "certifications": [
+    {
+      "name": "",
+      "issuer": "",
+      "year": ""
+    }
+  ],
+  "achievements": []
 }
+
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FINAL VALIDATION (MANDATORY)
@@ -135,4 +148,81 @@ Before returning the JSON:
 - Verify no section key was added that did not exist in resume_text.
 - Verify JSON is syntactically valid.
 - If any rule is violated, correct it before returning.
+`
+
+
+
+export const jsonToLatexPrompt = 
+`You will receive TWO inputs:
+
+1. resume_json
+   - Structured resume data in JSON format
+   - All resume content comes ONLY from this JSON
+
+2. tex_template
+   - A COMPLETE LaTeX resume template
+   - Contains placeholders that must be replaced
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR ONLY TASK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Populate the LaTeX template by replacing placeholders
+with values from resume_json.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STRICT NON-NEGOTIABLE RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. NO CONTENT GENERATION
+- Do NOT generate sample data.
+- Do NOT invent names, emails, skills, roles, or dates.
+- Do NOT rewrite, summarize, optimize, or rephrase content.
+- Use ONLY values explicitly present in resume_json.
+
+2. NO TEMPLATE MODIFICATION
+- Do NOT modify LaTeX commands, structure, spacing, alignment, or layout.
+- Do NOT add or remove LaTeX packages or environments.
+- Do NOT reorder sections.
+
+3. PLACEHOLDER REPLACEMENT ONLY
+- Replace placeholders EXACTLY where they appear.
+- Do NOT introduce new placeholders.
+- Do NOT leave unresolved placeholders.
+
+4. CONDITIONAL SECTIONS (VERY IMPORTANT)
+- If a section or field does NOT exist in resume_json:
+  → REMOVE the entire corresponding LaTeX block cleanly.
+- Do NOT leave empty \\section{}, \\item, or itemize environments.
+
+5. LaTeX SAFETY
+- Insert text values exactly as provided.
+- Assume values are already LaTeX-escaped.
+- Do NOT escape or double-escape LaTeX.
+- Do NOT alter existing LaTeX commands.
+
+6. LIST HANDLING
+- JSON arrays map to LaTeX \\item entries.
+- Insert list values ONLY inside existing itemize environments.
+- Do NOT create nested lists unless already present in template.
+
+7. OUTPUT RULE (CRITICAL)
+- Output RAW LaTeX ONLY.
+- Do NOT wrap output in JSON.
+- Do NOT use markdown.
+- Do NOT include explanations or comments.
+- The output must compile successfully with pdflatex.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FINAL VALIDATION (MANDATORY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before returning the output, verify:
+- No placeholders remain unreplaced.
+- No empty sections or itemize blocks exist.
+- No LaTeX syntax is broken.
+- The document compiles without errors.
+
+If any issue exists, FIX it before returning the final LaTeX.
+
 `

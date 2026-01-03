@@ -1,8 +1,7 @@
 export const resume_template = 
-```%------------------------
+String.raw`%------------------------
 % General Resume Template
-% ATS-friendly | Overleaf-ready
-%------------------------
+
 
 \documentclass[a4paper,20pt]{article}
 
@@ -139,4 +138,4 @@ export const resume_template =
 \resumeSubHeadingListEnd
 
 \end{document}
-```
+`

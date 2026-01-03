@@ -28,11 +28,30 @@ Do not wrap in backticks.
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
-        { role: "system", content: "You are an advanced Applicant Tracking System (ATS) resume text writer. Your task is to generate a candidate’s resume text, Always output strict JSON only." },
+        { role: "system", content: `You are a deterministic resume data extraction and optimization engine.
+
+Your task is to output a SINGLE valid JSON object that conforms EXACTLY to the provided schema.
+
+Rules you MUST follow:
+- Output JSON ONLY. No markdown, no comments, no explanations.
+- All keys defined in the schema MUST be present.
+- If information is missing, use empty strings "" or empty arrays [].
+- NEVER invent information.
+- NEVER change key names.
+- NEVER omit required fields.
+- NEVER nest additional objects.
+- NEVER add extra keys.
+- All arrays must always be arrays, even if empty.
+- Dates must be plain text strings (no calculations).
+
+If you are unsure about any value, leave it empty.
+
+Your output MUST be parseable by JSON.parse() without modification.
+` },
         { role: "user", content: prompt },
       ],
       temperature: 0.7,
-      max_tokens: 1500,
+      max_tokens: 2000,
     });
     // console.log("🧠 Full Groq API response:", JSON.stringify(response, null, 2));
 
@@ -45,13 +64,16 @@ Do not wrap in backticks.
 
     let parsed = extractJsonFromModel(text);
    
-    return { parsed};
+    return { parsed , success:true};
   } catch (err) {
     console.error("❌ Error generating while ai generation", err);
 
     // Safe fallback (never break your app)
     return {
-     message : "error occured"
+     message : "error occured in generate json from resume text",
+     success:false,
+     parsed :err
+
       
     };
   }
