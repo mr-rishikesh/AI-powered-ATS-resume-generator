@@ -2,9 +2,18 @@
  * Extract a balanced { ... } block from text (first occurrence).
  * Then sanitize string values (escape raw newlines/tabs) so JSON.parse works.
  * Returns parsed object or null if parsing fails.
+ *
+ * This function handles common AI model output issues:
+ * - Markdown code blocks (```json ... ```)
+ * - Unescaped newlines and tabs in strings
+ * - Nested JSON objects
+ * - Trailing text after valid JSON
  */
-export function extractJsonFromModel(text:any) {
-  if (!text || typeof text !== "string") return null;
+export function extractJsonFromModel(text: any) {
+  if (!text || typeof text !== "string") {
+    console.error("❌ extractJsonFromModel: Invalid input - not a string");
+    return null;
+  }
 
   // 1) Remove common markdown fences around JSON (```json ... ``` or ``` ... ```)
   const withoutFences = text.replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
@@ -98,10 +107,22 @@ export function extractJsonFromModel(text:any) {
   // 4) Try JSON.parse
   try {
     const parsed = JSON.parse(out);
+    console.log("✅ JSON parsed successfully");
+
+    // Validate it's an object
+    if (typeof parsed !== 'object' || parsed === null) {
+      console.error("❌ Parsed result is not a valid object");
+      return null;
+    }
+
     return parsed;
-  } catch (err) {
+  } catch (err: any) {
+    console.error("❌ JSON.parse failed:", err.message);
+    console.error("Failed JSON string (first 500 chars):", out.substring(0, 500));
+
     // parsing failed even after sanitization
     // As a last-ditch attempt, try to extract subject/body via regex pairs
+    // (This is a legacy fallback for email-style responses)
     const subjectMatch =
       out.match(/"subject"\s*:\s*"([\s\S]*?)"\s*(,|\})/i) ||
       out.match(/subject\s*:\s*"([\s\S]*?)"\s*(,|\})/i);
@@ -110,31 +131,24 @@ export function extractJsonFromModel(text:any) {
       out.match(/body\s*:\s*"([\s\S]*?)"\s*(,|\})/i);
 
     if (subjectMatch || bodyMatch) {
-// const decode = (s) =>
-//   s
-//     ? s
-//         .replace(/\\n\\n/g, "\r\n\r\n") // double newlines = paragraph break
-//         .replace(/\\n/g, "\r\n")        // single newlines = line break
-//         .replace(/\\t/g, "\t")
-//         .replace(/\\"/g, '"')
-//         .trim()
-//     : null;
-const decode = (s:any) =>
-  s
-    ? s
-        // Convert escaped newlines into *double* real newlines
-        .replace(/\\n\\n/g, "") // if model used double newline, keep extra spacing
-        .replace(/\\n/g, "")            // every newline → 2 real line breaks
-        .replace(/\\t/g, "\t")
-        .replace(/\\"/g, '')
-        .trim()
-    : null;
+      const decode = (s: any) =>
+        s
+          ? s
+              .replace(/\\n\\n/g, "") // if model used double newline, keep extra spacing
+              .replace(/\\n/g, "")    // every newline → 2 real line breaks
+              .replace(/\\t/g, "\t")
+              .replace(/\\"/g, '')
+              .trim()
+          : null;
+
+      console.log("⚠️ Using fallback subject/body extraction");
       return {
         subject: subjectMatch ? decode(subjectMatch[1]) : null,
         body: bodyMatch ? decode(bodyMatch[1]) : null,
       };
     }
 
+    console.error("❌ All JSON extraction methods failed");
     return null;
   }
 }
