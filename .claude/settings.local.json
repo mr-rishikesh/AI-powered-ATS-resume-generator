@@ -1,7 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(typst:*)",
+      "Bash(winget list:*)",
+      "Bash(curl:*)",
+      "Bash(tar:*)",
+      "Bash(chmod:*)",
+      "Bash(unzip:*)",
+      "Bash(powershell:*)",
+      "Bash(./typst-x86_64-pc-windows-msvc/typst.exe:*)",
+      "Bash(cd:*)",
+      "Bash(\"c:\\\\NEXT WITH NEW START\\\\Smart_Resume_Analyzer _ATS_Optimizer\\\\resume-analyzer\\\\bin\\\\typst\\\\typst.exe\" --version)",
+      "Bash(node -e:*)",
+      "Bash(\"c:\\\\NEXT WITH NEW START\\\\Smart_Resume_Analyzer _ATS_Optimizer\\\\resume-analyzer\\\\bin\\\\typst\\\\typst.exe\" compile \"c:\\\\NEXT WITH NEW START\\\\Smart_Resume_Analyzer _ATS_Optimizer\\\\resume-analyzer\\\\temp\\\\test_resume.typ\" \"c:\\\\NEXT WITH NEW START\\\\Smart_Resume_Analyzer _ATS_Optimizer\\\\resume-analyzer\\\\temp\\\\test_resume.pdf\")"
     ]
   }
 }
