@@ -22,6 +22,8 @@ export default function PdfUpload({ onResumeLoaded }: PdfUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<string>('');
+  const [jobDescription, setJobDescription] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isValidFile = (file: File): boolean => {
@@ -39,7 +41,7 @@ export default function PdfUpload({ onResumeLoaded }: PdfUploadProps) {
     return '.' + file.name.split('.').pop()?.toLowerCase();
   };
 
-  const handleFileSelect = async (file: File) => {
+  const handleFileSelect = (file: File) => {
     // Validate file type
     if (!isValidFile(file)) {
       setError(`Unsupported file type. Please upload: ${SUPPORTED_EXTENSIONS.join(', ')}`);
@@ -54,12 +56,23 @@ export default function PdfUpload({ onResumeLoaded }: PdfUploadProps) {
     }
 
     setError(null);
+    setSelectedFile(file);
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedFile) {
+      setError('Please select a resume file');
+      return;
+    }
+
+    setError(null);
     setIsUploading(true);
     setUploadProgress('Uploading file...');
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', selectedFile);
+      formData.append('jobDescription', jobDescription);
 
       setUploadProgress('Processing resume with AI...');
 
@@ -78,7 +91,7 @@ export default function PdfUpload({ onResumeLoaded }: PdfUploadProps) {
         throw new Error('No resume data returned. Please try a different file.');
       }
 
-      setUploadProgress('Resume processed successfully!');
+      setUploadProgress('Resume optimized successfully!');
 
       // Small delay to show success message
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -133,13 +146,16 @@ export default function PdfUpload({ onResumeLoaded }: PdfUploadProps) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-6">
+      {/* File Upload */}
       <div
         className={`
           border-2 border-dashed rounded-xl p-12 text-center cursor-pointer
           transition-all duration-200 ease-in-out
           ${isDragging
             ? 'border-blue-500 bg-blue-50 scale-[1.02]'
+            : selectedFile
+            ? 'border-green-400 bg-green-50'
             : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-gray-50'
           }
           ${isUploading ? 'opacity-70 cursor-wait pointer-events-none' : ''}
@@ -176,6 +192,13 @@ export default function PdfUpload({ onResumeLoaded }: PdfUploadProps) {
               <p className="text-lg font-semibold text-blue-600">{uploadProgress}</p>
               <p className="text-sm text-gray-500 mt-2">Please wait, this may take a moment...</p>
             </div>
+          ) : selectedFile ? (
+            <div>
+              <p className="text-lg font-semibold text-green-600">✓ {selectedFile.name}</p>
+              <p className="text-sm text-gray-500 mt-2">
+                File ready. Add job description below to optimize.
+              </p>
+            </div>
           ) : (
             <div>
               <p className="text-lg font-semibold text-gray-700">
@@ -191,6 +214,43 @@ export default function PdfUpload({ onResumeLoaded }: PdfUploadProps) {
           )}
         </div>
       </div>
+
+      {/* Job Description Input */}
+      {selectedFile && !isUploading && (
+        <div className="space-y-3">
+          <label htmlFor="jobDescription" className="block text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+            Job Description (Optional but Recommended)
+          </label>
+          <textarea
+            id="jobDescription"
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            placeholder="Paste the job description here to optimize your resume for this specific role..."
+            className="w-full h-40 px-4 py-3 rounded-lg border resize-none focus:outline-none focus:ring-2 transition-all"
+            style={{
+              background: 'var(--input)',
+              borderColor: 'var(--border)',
+              color: 'var(--foreground)'
+            }}
+          />
+          <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            Adding a job description helps optimize your resume with relevant keywords and skills
+          </p>
+
+          {/* Submit Button */}
+          <button
+            onClick={handleSubmit}
+            disabled={isUploading}
+            className="w-full px-6 py-3 rounded-lg font-semibold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: 'var(--foreground)',
+              color: 'var(--background)'
+            }}
+          >
+            {isUploading ? 'Processing...' : 'Analyze & Optimize Resume'}
+          </button>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (

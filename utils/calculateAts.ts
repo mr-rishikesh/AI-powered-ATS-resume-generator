@@ -21,9 +21,7 @@ export async function generateATSScore(resumeText: any, jobDescription: any) {
       throw new Error("Resume text is too short or empty for ATS analysis");
     }
 
-    if (!jobDescription || jobDescription.trim().length < 20) {
-      throw new Error("Job description is too short or empty for ATS analysis");
-    }
+
 
     const prompt = `
 ${calculateAtsPrompt}

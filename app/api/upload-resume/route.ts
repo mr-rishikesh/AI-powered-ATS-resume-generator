@@ -2,7 +2,6 @@ import '../../../envConfig'
 import { extractText } from "unpdf";
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
-import { generateATSScore } from "@/utils/calculateAts";
 import { generateResume } from '@/utils/main';
 
 /**
@@ -84,7 +83,7 @@ export async function POST(req: Request) {
 
     console.log(`✅ Extracted ${extractedText.length} characters from resume`);
 
-    // Step 3: Generate ATS-optimized resume JSON
+    // Step 3: Generate ATS-optimized resume JSON (with job description if provided)
     const resumeResult = await generateResume(extractedText, jobDescription);
 
     if (!resumeResult.success || !resumeResult.parsed) {
@@ -103,22 +102,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Step 4: Calculate ATS score (optional, if job description provided)
-    let atsScoreResult = null;
-    if (jobDescription && jobDescription.trim().length > 20) {
-      console.log("📊 Calculating ATS score...");
-      atsScoreResult = await generateATSScore(extractedText, jobDescription);
-
-      if (atsScoreResult && !atsScoreResult.message) {
-        console.log(`✅ ATS Score: ${atsScoreResult.parsed?.overall_ats_score || 'N/A'}`);
-      }
-    }
-
-    // Step 5: Return successful response
+    // Step 4: Return successful response
     return NextResponse.json({
       success: true,
       optimizedResume: resumeResult.parsed,
-      atsScore: atsScoreResult?.parsed || null,
       extractedText,
       meta: {
         fileName,
